@@ -2,13 +2,13 @@ import asyncio
 import json
 import random
 from datetime import datetime, timedelta
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, types, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.filters import Command
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 import os
 
 # === КОНФИГ ===
@@ -70,7 +70,7 @@ async def send_pup(chat_id, text, image='happy', reply_markup=None):
         await bot.send_message(chat_id, text, reply_markup=reply_markup)
 
 # === /start ===
-@dp.message(commands=['start'])
+@dp.message(Command("start"))
 async def start(message: types.Message, state: FSMContext):
     if message.from_user.id != MILANA_ID:
         return
@@ -79,7 +79,7 @@ async def start(message: types.Message, state: FSMContext):
     await state.set_state(Form.waiting_photo1)
 
 # === ФОТО 1 ===
-@dp.message(Form.waiting_photo1, types.ContentType.PHOTO)
+@dp.message(Form.waiting_photo1, F.photo)
 async def photo1(message: types.Message, state: FSMContext):
     await send_pup(MILANA_ID, "Ого, какой красивый! А как его зовут? 🌷", 'surprise')
     await state.update_data(photo1=message.photo[-1].file_id)
@@ -96,7 +96,7 @@ async def name1(message: types.Message, state: FSMContext):
     await state.set_state(Form.waiting_photo2)
 
 # === ФОТО 2 ===
-@dp.message(Form.waiting_photo2, types.ContentType.PHOTO)
+@dp.message(Form.waiting_photo2, F.photo)
 async def photo2(message: types.Message, state: FSMContext):
     await send_pup(MILANA_ID, "Вау! А имя? 🌺", 'surprise')
     await state.update_data(photo2=message.photo[-1].file_id)
@@ -153,7 +153,7 @@ async def daily_greeting():
         if 8 <= now.hour <= 10 and now.minute == 0:
             await send_pup(MILANA_ID, "Доброе утро, Миланочка! ☀️ Новый день — новые листочки!", 'happy')
         if 20 <= now.hour <= 22 and now.minute == 0:
-            await send_pup(MILANA_ID, "Спокойной ночи, Миланочка! 🌙 Цветочки спят и шепчут \"спасибо\" 💚", 'love')
+            await send_pup(MILANA_ID, "Спокойной ночи, Миланочка! 🌙 Цветочки спят и шепчут 'спасибо' 💚", 'love')
         await asyncio.sleep(60)
 
 # === СТАРТ ===
